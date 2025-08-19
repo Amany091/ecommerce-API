@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const {hostedImage} = require("../middlewares/uploadImgMiddleware")
+
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -37,21 +39,7 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 12);
   })
 
-userSchema.post('save', function(doc) {    
-    if (doc.profileImg) {                
-        const imgUrl = `${process.env.BASE_URL}/users/${doc.profileImg}`;        
-        doc.profileImg = imgUrl;
-    }
-});
-
-// findOne , findAll , Update
-userSchema.post('init', function(doc) {
-    if (doc.profileImg) {
-        const imgUrl = `${process.env.BASE_URL}/users/${doc.profileImg}`;
-        doc.profileImg = imgUrl;
-    }
-});
-
+hostedImage("users", userSchema, "profileImg")
 
 const User = mongoose.model("User", userSchema);
 

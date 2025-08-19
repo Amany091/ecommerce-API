@@ -18,7 +18,6 @@ exports.createUserValidator = [
     .custom((val) =>
       User.findOne({ email: val }).then((user) => {
         if (user) {
-          console.log(user);
 
           return Promise.reject(new Error("E-mail already in user"));
         }

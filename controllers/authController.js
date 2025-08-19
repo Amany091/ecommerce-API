@@ -15,7 +15,6 @@ exports.signup = asyncWrapper(async (req, res, next) => {
         email: req.body.email,
         password: req.body.password
     })
-    // const token = createToken(user._id)
     return res.status(201).json({ data: user })
 
 })
@@ -32,9 +31,8 @@ exports.login = asyncWrapper(async (req, res, next) => {
     const token = createToken(user._id)
     res.cookie("access_token", `Bearer ${token}`, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        withCredentials: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({ data: { user: user, token: token } })

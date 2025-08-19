@@ -29,7 +29,6 @@ exports.updateCategoryValidator = [
     check("id").isMongoId().withMessage("Invalid category id format"),
 
     check("name").optional().isLength({min:6}).withMessage("Category name must be at least 6 characters long").isLength({max:32}).withMessage("Category name must be at most 20 characters long").custom((val) => {
-        console.log(val);
         
         return Category.findOne({ name: val }).then((cat) => {
             if (cat) {

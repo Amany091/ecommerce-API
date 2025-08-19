@@ -5,7 +5,7 @@ const express = require("express")
 const morgan = require("morgan")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
-const passport = require("passport")
+// const passport = require("passport")
 const session = require("express-session")
 
 const ApiError = require("./utils/ApiError")
@@ -16,12 +16,12 @@ const authRoutes = require("./routes/authRoute")
 const productsRoutes = require("./routes/productRoute")
 const ordersRoutes = require("./routes/orderRoute");
 const { DBConnection } = require('./configs/DB');
-require("./configs/passport")(passport)
+// require("./configs/passport")(passport)
 
 const app = express()
 
 app.use(session({
-    secret: "cat",
+    secret: process.env.JWT_SECRET_KEY,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -31,13 +31,16 @@ app.use(session({
 }))
 
 // passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
+// app.use(passport.initialize())
+// app.use(passport.session())
+
+const HOST_URL = process.env.NODE_ENV === "development" ? 
+    process.env.CLIENT_URL : process.env.CLIENT_HOST_URL;
 
 DBConnection()
 app.use(
     cors({
-        origin: [process.env.CLIENT_URL],
+        origin: HOST_URL,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
         credentials: true,
     })
@@ -46,7 +49,6 @@ app.use(
 // Middleware
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan("dev"))
-    console.log(`mode : ${process.env.NODE_ENV}`)
 }
 
 if (process.env.NODE_ENV === "production") {
@@ -57,7 +59,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({extended: true}));
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, "uploads")))
 
@@ -71,7 +73,7 @@ app.use(`/api/v1/orders`, ordersRoutes);
 
 
 
-app.all("*", (req, next) => {
+app.all("*", (req,res, next) => {
     next(new ApiError(`cant't find this route ${req.originalUrl}`), 404)
 })
 //Global Error Handling Middleware For Express

@@ -2,7 +2,6 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const ApiError = require('../utils/ApiError');
 exports.uploadSingleImg = (fieldName,folderName,name) => {
-   console.log(fieldName,folderName,name);
    
     const multerStorage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -25,7 +24,6 @@ exports.uploadSingleImg = (fieldName,folderName,name) => {
         }
     }
     const upload = multer({ storage: multerStorage, fileFilter })
-    console.log(fieldName);
     
     return upload.single(fieldName)
 }
@@ -33,18 +31,15 @@ exports.uploadSingleImg = (fieldName,folderName,name) => {
 
 
 exports.uploadMixOfImages = (fields, folderName, fileName) => {
-    console.log(fields, folderName, fileName);
     
     const multerStorage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, `uploads/${folderName}`);
-            console.log(10);
             
         },
         filename: function (req, file, cb) {
             const ext = file.mimetype.split("/")[1];
             const customFileName = `${fileName}-${uuidv4()}-${Date.now()}.${ext}`;
-            console.log(customFileName);
             
             cb(null, customFileName);
         }
@@ -62,3 +57,25 @@ exports.uploadMixOfImages = (fields, folderName, fileName) => {
     const upload = multer({ storage: multerStorage, fileFilter });
     return upload.fields(fields); // Ensure you're using upload.fields
 };
+
+exports.hostedImage = (folderName, schema, field)=>{
+     function updateImageUrl(doc) {
+       if (Array.isArray(doc[field])) {
+         doc[field] = doc[field].map((img) =>
+           img && !img.startsWith("http")
+             ? `${process.env.BASE_URL}/${folderName}/${img}`
+             : img
+         );
+       } else if (doc[field] && !doc[field].startsWith("http")) {
+         doc[field] = `${process.env.BASE_URL}/${folderName}/${doc[field]}`;
+       }
+     }
+
+     schema.post("save", function (doc) {
+       updateImageUrl(doc);
+     });
+
+     schema.post("init", function (doc) {
+       updateImageUrl(doc);
+     });
+}

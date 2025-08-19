@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { hostedImage } = require("../middlewares/uploadImgMiddleware");
+
 
 const categorySchema = mongoose.Schema({
   name: {
@@ -23,21 +25,6 @@ categorySchema.set("toJSON", {
   virtuals: true,
 });
 
-// categorySchema.post('save', function(doc) {    
-//   if (doc.image) {                
-//       const imgUrl = `${process.env.BASE_URL}/categories/${doc.image}`;        
-//       doc.image = imgUrl;
-//   }
-// });
-
-// // findOne , findAll , Update
-// categorySchema.post('init', function(doc) {
-//   if (doc.image) {
-//       const imgUrl = `${process.env.BASE_URL}/categories/${doc.image}`;
-//       doc.image = imgUrl;
-//   }
-  
-// });
-
+hostedImage("categories", categorySchema, "image")
 
 exports.Category = mongoose.model("Category", categorySchema);
