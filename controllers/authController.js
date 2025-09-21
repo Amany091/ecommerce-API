@@ -30,10 +30,10 @@ exports.login = asyncWrapper(async (req, res, next) => {
     if (!isMatch) return next(new ApiError(process.env.INVALID_CREDENTIALS, 401))
     const token = createToken(user._id)
     res.cookie("access_token", `Bearer ${token}`, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({ data: { user: user, token: token } })
 

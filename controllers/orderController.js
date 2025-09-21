@@ -2,6 +2,7 @@ const asyncWrapper = require("../utils/asyncWrapper");
 const { getDocument, deleteDocument } = require("../utils/handler");
 const Order = require("../models/order");
 const { OrderItem } = require("../models/order-item");
+const paginate = require("../utils/paginate");
 
 exports.createOrder = asyncWrapper(async (req, res) => {
   const orderItemsIds = Promise.all(
@@ -42,24 +43,52 @@ exports.createOrder = asyncWrapper(async (req, res) => {
   return res.status(201).json({ data: order });
 });
 
+// number of orders
+exports.getOrdersCount = asyncWrapper(async (req, res) => {
+  try {
+    const orderCount = await Order.countDocuments();
+
+    if (!orderCount && orderCount !== 0) {
+      return res.status(500).json({ success: false });
+    }
+
+    res.send({
+      orderCount: orderCount,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 exports.getAllOrders = asyncWrapper(async (req, res) => {
-  const page = +req.query.page || 1;
-  const limit = +req.query.limit || 10;
-  const skip = (page - 1) * limit;
-
-  const orderList = await Order.find()
-    .populate("user", "name")
-    .populate({
-      path: "orderItems",
-      populate: {
-        path: "product",
+  const { page, status, userName } = req.query;
+  const count = await Order.countDocuments();
+  const limit = 5;
+  const filter = {}
+  if(status) filter.status = status;
+  let userFilter = {};
+  if(userName) userFilter = {name : {$regex: userName, $options: "i"}};
+  
+  const data = await paginate(
+    Order,
+    filter,
+    { page, limit },
+    [
+      { path: "user", select: "name", match: userFilter },
+      {
+        path: "orderItems",
+        populate: { path: "product" },
       },
-    })
-    .sort({ dateOrdered: -1 })
-    .skip(skip)
-    .limit(limit);
+    ]
+  );
+  const result = data.results.filter(order => order.user); // Remove user when user is null
 
-  return res.status(200).json({ page, limit, data: orderList });
+  return res.status(200).json({
+    success: true,
+    count,
+    data: result,
+    pagination: data.pagination,
+  });
 });
 
 exports.updateOrder = asyncWrapper(async (req, res) => {
@@ -93,23 +122,6 @@ exports.getOrdersPrice = asyncWrapper(async (req, res) => {
   }
 
   res.send({ totalsales: totalSales.pop().totalsales });
-});
-
-// number of orders
-exports.getOrdersCount = asyncWrapper(async (req, res) => {
-  try {
-    const orderCount = await Order.countDocuments();
-
-    if (!orderCount && orderCount !== 0) {
-      return res.status(500).json({ success: false });
-    }
-
-    res.send({
-      orderCount: orderCount,
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
 });
 
 // search by user

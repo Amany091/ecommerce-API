@@ -2,6 +2,7 @@ const asyncWrapper = require("../utils/asyncWrapper")
 const ApiError = require("../utils/ApiError")
 const { getDocument, deleteDocument } = require("../utils/handler")
 const Product = require("../models/product")
+const paginate = require('../utils/paginate')
 const { uploadMixOfImages } = require("../middlewares/uploadImgMiddleware")
 exports.uploadProductImages = uploadMixOfImages([
     { name: 'imgCover', maxCount: 1 },
@@ -26,40 +27,34 @@ exports.createProduct = asyncWrapper(async (req, res) => {
 })
 
 exports.getAllProducts = asyncWrapper(async (req, res) => {
-    const page = +req.query.page || 1
-    const limit = +req.query.limit || 10
-    const skip = (page - 1) * limit
-    const minPrice = parseInt(req.query.minPrice) || 0
-    const maxPrice = parseInt(req.query.maxPrice) || 0
-    const size = req.query.size || ''
-    // const colors = req.query.colors || []
-    const color = req.query.color || '';
-    const filter = {}
-    if(req.query.category){
-        filter.category = req.query.category
-    }
+      const { page, limit, minPrice, maxPrice, size, color, category } =req.query;
+    const filter = {};
+
+    if (category) filter.category = category;
 
     if (minPrice && maxPrice) {
-        filter.price = { $gte: minPrice, $lte: maxPrice }
+        filter.price = { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) };
     } else if (minPrice) {
-        filter.price = { $gte: minPrice }
+        filter.price = { $gte: parseInt(minPrice) };
     } else if (maxPrice) {
-        filter.price = { $lte: maxPrice }
+        filter.price = { $lte: parseInt(maxPrice) };
     }
 
-    // if(colors.length > 0){
-    //     filter.colors = { $in: colors }
-    // }
-    if (color) {
-        filter.color = color
-    }
+    if (color) filter.color = color;
+    if (size) filter.size = size;
 
-    if(size){
-        filter.size = size
-    }
-    const products = await Product.find(filter).skip(skip).limit(limit).populate("category brand")
-    const totalProducts = await Product.countDocuments(filter)
-    return res.status(200).json({ page, limit, total: totalProducts, data: products })
+    const data = await paginate(
+      Product,
+      filter,
+      { page, limit },
+      "category brand"
+    );
+
+    return res.status(200).json({
+      success: true,
+      products: data.results,
+      pagination: data.pagination
+    });
 })
 
 
