@@ -40,7 +40,7 @@ const HOST_URL = process.env.NODE_ENV === "development" ?
 DBConnection()
 app.use(
     cors({
-        origin: HOST_URL,
+        origin: "*",
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
         credentials: true,
     })
@@ -52,9 +52,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../FE/dist")));
+    const frontendPath = path.join(__dirname, "../FE/dist");
+    app.use(express.static(path.join(frontendPath)));
     app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+        res.sendFile(path.resolve(frontendPath, "index.html"));
     })
 }
 
