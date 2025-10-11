@@ -34,8 +34,8 @@ app.use(session({
 // app.use(passport.initialize())
 // app.use(passport.session())
 
-const HOST_URL = process.env.NODE_ENV === "development" ? 
-    process.env.CLIENT_URL : process.env.CLIENT_HOST_URL;
+// const HOST_URL = process.env.NODE_ENV === "development" ? 
+//     process.env.CLIENT_URL : process.env.CLIENT_HOST_URL;
 
 DBConnection()
 app.use(
@@ -51,13 +51,13 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan("dev"))
 }
 
-if (process.env.NODE_ENV === "production") {
-    const frontendPath = path.join(__dirname, "../FE/dist");
-    app.use(express.static(path.join(frontendPath)));
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(frontendPath, "index.html"));
-    })
-}
+// if (process.env.NODE_ENV === "production") {
+//     const frontendPath = path.join(__dirname, "../FE/dist");
+//     app.use(express.static(path.join(frontendPath)));
+//     app.get("*", (req, res) => {
+//         res.sendFile(path.resolve(frontendPath, "index.html"));
+//     })
+// }
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}));
