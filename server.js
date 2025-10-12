@@ -5,7 +5,6 @@ const express = require("express")
 const morgan = require("morgan")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
-// const passport = require("passport")
 const session = require("express-session")
 
 const ApiError = require("./utils/ApiError")
@@ -16,7 +15,6 @@ const authRoutes = require("./routes/authRoute")
 const productsRoutes = require("./routes/productRoute")
 const ordersRoutes = require("./routes/orderRoute");
 const { DBConnection } = require('./configs/DB');
-// require("./configs/passport")(passport)
 
 const app = express()
 
@@ -29,13 +27,6 @@ app.use(session({
         httpOnly: true,
     },
 }))
-
-// passport middleware
-// app.use(passport.initialize())
-// app.use(passport.session())
-
-// const HOST_URL = process.env.NODE_ENV === "development" ? 
-//     process.env.CLIENT_URL : process.env.CLIENT_HOST_URL;
 
 DBConnection()
 app.use(
@@ -50,14 +41,6 @@ app.use(
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan("dev"))
 }
-
-// if (process.env.NODE_ENV === "production") {
-//     const frontendPath = path.join(__dirname, "../FE/dist");
-//     app.use(express.static(path.join(frontendPath)));
-//     app.get("*", (req, res) => {
-//         res.sendFile(path.resolve(frontendPath, "index.html"));
-//     })
-// }
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}));
@@ -90,7 +73,9 @@ app.use((err, res, next) => {
 
 })
 
-const port = process.env.PORT || 5000
-app.listen(port, () => {
-    console.log(`App listen on port ${port}`);
-})
+module.exports = app;
+
+// const port = process.env.PORT || 5000
+// app.listen(port, () => {
+//     console.log(`App listen on port ${port}`);
+// })
