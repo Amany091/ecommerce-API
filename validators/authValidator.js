@@ -4,55 +4,55 @@ const User = require('../models/user');
 require('dotenv').config();
 
 exports.signupValidator = [
-  check('name')
+  check("name")
     .notEmpty()
-    .withMessage(process.env.USER_NAME_REQUIRED)
+    .withMessage("User name is required")
     .isLength({ min: 3 })
-    .withMessage(process.env.USER_NAME_TOO_SHORT),
+    .withMessage("User name must be at least 3 characters"),
 
-  check('email')
+  check("email")
     .notEmpty()
-    .withMessage(process.env.EMAIL_REQUIRED)
+    .withMessage("Email is required")
     .isEmail()
-    .withMessage(process.env.INVALID_EMAIL)
+    .withMessage("Invalid email address")
     .custom(async (val) => {
       const user = await User.findOne({ email: val });
       if (user) {
-        throw new Error(process.env.EMAIL_ALREADY_IN_USE);
+        throw new Error("Email is already in use");
       }
     }),
 
-  check('password')
+  check("password")
     .notEmpty()
-    .withMessage(process.env.PASSWORD_REQUIRED)
+    .withMessage("Password is required")
     .isLength({ min: 6 })
-    .withMessage(process.env.PASSWORD_TOO_SHORT)
+    .withMessage("Password must be at least 6 characters")
     .custom((password, { req }) => {
       if (password !== req.body.passwordConfirm) {
-        throw new Error(process.env.PASSWORD_CONFIRM_MISMATCH);
+        throw new Error("Password confirmation does not match");
       }
       return true;
     }),
 
-  check('passwordConfirm')
+  check("passwordConfirm")
     .notEmpty()
-    .withMessage(process.env.PASSWORD_CONFIRM_REQUIRED),
+    .withMessage("Password confirmation is required"),
 
   validatorMiddleware,
 ];
 
 exports.loginValidator = [
-  check('email')
+  check("email")
     .notEmpty()
-    .withMessage(process.env.EMAIL_REQUIRED)
+    .withMessage("Email is required")
     .isEmail()
-    .withMessage(process.env.INVALID_EMAIL),
+    .withMessage("Invalid email address"),
 
-  check('password')
+  check("password")
     .notEmpty()
-    .withMessage(process.env.PASSWORD_REQUIRED)
+    .withMessage("Password is required")
     .isLength({ min: 6 })
-    .withMessage(process.env.PASSWORD_TOO_SHORT),
+    .withMessage("Password must be at least 6 characters"),
 
   validatorMiddleware,
 ];

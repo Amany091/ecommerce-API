@@ -6,8 +6,6 @@ const morgan = require("morgan")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
 const session = require("express-session")
-
-const ApiError = require("./utils/ApiError")
 const userRoutes = require("./routes/user")
 const categoriesRoutes = require("./routes/categoryRoute");
 const brandsRoutes = require("./routes/brandRoute");
@@ -15,18 +13,29 @@ const authRoutes = require("./routes/authRoute")
 const productsRoutes = require("./routes/productRoute")
 const ordersRoutes = require("./routes/orderRoute");
 const { DBConnection } = require('./configs/DB');
+const MongoStore = require("connect-mongo")
+
 
 const app = express()
+app.set("trust proxy", 1);
 
-app.use(session({
+app.use(
+  session({
     secret: process.env.JWT_SECRET_KEY,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-        secure: false,
-        httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      store: MongoStore.create({
+        mongoUrl: process.env.DB_URL,
+        collectionName: "sessions",
+        ttl: 14 * 24 * 60 * 60,
+      }),
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
-}))
+  })
+);
 
 DBConnection()
 app.use(
@@ -57,9 +66,10 @@ app.use(`/api/v1/orders`, ordersRoutes);
 
 
 
-app.all("*", (req,res, next) => {
-    next(new ApiError(`cant't find this route ${req.originalUrl}`), 404)
-})
+// app.all("*", (req,res, next) => {
+//     next(new ApiError(`cant't find this route ${req.originalUrl}`), 404)
+// })
+
 //Global Error Handling Middleware For Express
 app.use((err, res, next) => {
     err.statusCode = err.statusCode || 500
@@ -75,7 +85,7 @@ app.use((err, res, next) => {
 
 module.exports = app;
 
-// const port = process.env.PORT || 5000
-// app.listen(port, () => {
-//     console.log(`App listen on port ${port}`);
-// })
+const port = process.env.PORT || 5000
+app.listen(port, () => {
+    console.log(`App listen on port ${port}`);
+})

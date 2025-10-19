@@ -5,7 +5,7 @@ const asyncWrapper = require("../utils/asyncWrapper")
 const ApiError = require("../utils/ApiError")
 
 const createToken = (payload) => {
-    return jwt.sign({ userId: payload }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE_TIME })
+    return jwt.sign({ userId: payload }, process.env.JWT_SECRET_KEY, { expiresIn: '10d' })
 
 }
 exports.signup = asyncWrapper(async (req, res, next) => {
@@ -28,7 +28,7 @@ exports.login = asyncWrapper(async (req, res, next) => {
     }
     const isMatch = await bcrypt.compare(req.body.password, user.password)
 
-    if (!isMatch) return next(new ApiError(process.env.INVALID_CREDENTIALS, 401))
+    if (!isMatch) return next(new ApiError("Incorrect Email or Password", 401));
     const token = createToken(user._id)
     res.cookie("access_token", `Bearer ${token}`, {
       httpOnly: true,
