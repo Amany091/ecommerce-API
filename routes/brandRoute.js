@@ -7,7 +7,7 @@ const {
   getBrand,
 } = require("../controllers/brandController");
 const express = require("express");
-const { createBrandValidator, deleteBrandValidator, updateBrandValidator, getBrandValidator } = require("../validators/BrandValidator");
+const { createBrandValidator, deleteBrandValidator, updateBrandValidator, getBrandValidator } = require("../validators/brandValidator");
 const { allowedTo, authentication } = require("../middlewares/authMiddleware");
 const router = express.Router();
 // const multer = require("multer");
