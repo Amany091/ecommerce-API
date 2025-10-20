@@ -17,6 +17,15 @@ const MongoStore = require("connect-mongo")
 
 
 const app = express()
+
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : process.env.BASE_URL,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.set("trust proxy", 1);
 
 app.use(
@@ -39,13 +48,7 @@ app.use(
 );
 
 DBConnection()
-app.use(
-    cors({
-        origin: "*",
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        credentials: true,
-    })
-);
+
 
 // Middleware
 if (process.env.NODE_ENV === 'development') {
