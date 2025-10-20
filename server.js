@@ -21,17 +21,18 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
+    name: "connect.sid",
     secret: process.env.JWT_SECRET_KEY,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.DB_URL,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60,
+    }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      store: MongoStore.create({
-        mongoUrl: process.env.DB_URL,
-        collectionName: "sessions",
-        ttl: 14 * 24 * 60 * 60,
-      }),
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
