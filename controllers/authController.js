@@ -42,8 +42,12 @@ exports.login = asyncWrapper(async (req, res, next) => {
 
 
 exports.logoutCtrl = asyncWrapper(async (req, res) => {
-    res.clearCookie("access_token");
-    await res.send({ success: true });
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+    await res.status(200).send({ success: true });
 }),
 
     exports.getCurrentUserCtrl = asyncWrapper(async (req, res) => {
