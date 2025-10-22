@@ -109,6 +109,21 @@ exports.getOrder = asyncWrapper(async (req, res) => {
   return res.status(200).json({ data: order });
 });
 
+exports.updateAllOrders = asyncWrapper(async (req,res)=>{
+  const toUpdate = await Order.find({ status: { $ne: "completed" } });
+  if(!toUpdate.length){
+    return res.status(200).json({ data: "No orders to update" });
+  }
+  const ids = toUpdate.map(order => order._id);
+
+  await Order.updateMany(
+    { _id: {$in: ids} },
+    { $set: { status: "completed" } }
+  );
+  const result = await Order.find({_id: {$in: ids}});
+  return res.status(200).json({ data: result });
+})
+
 exports.deleteOrder = deleteDocument(Order);
 
 // total price of all orders in the system
@@ -139,3 +154,8 @@ exports.getUserOrders = asyncWrapper(async (req, res) => {
 
   return res.status(201).json({ data: userOrderList });
 });
+
+exports.deleteAllOrders = asyncWrapper(async (req,res)=>{
+  const result = await Order.deleteMany();
+  return res.status(200).json({ message: "All orders deleted", data: result });
+})

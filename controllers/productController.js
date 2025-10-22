@@ -27,7 +27,7 @@ exports.createProduct = asyncWrapper(async (req, res) => {
 })
 
 exports.getAllProducts = asyncWrapper(async (req, res) => {
-      const { page, limit, minPrice, maxPrice, size, color, category } =req.query;
+      const { page, limit, minPrice, maxPrice, size, color, category, type } =req.query;
     const filter = {};
 
     if (category) filter.category = category;
@@ -42,6 +42,7 @@ exports.getAllProducts = asyncWrapper(async (req, res) => {
 
     if (color) filter.color = color;
     if (size) filter.size = size;
+    if (type) filter.type = type;
 
     const data = await paginate(
       Product,
@@ -74,6 +75,14 @@ exports.updateProduct = asyncWrapper(async (req, res) => {
 
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
     return res.status(200).json({ data: product })
+});
+
+exports.deleteProduct = asyncWrapper(async (req, res, next) => {
+    const product = await Product.findByIdAndDelete(req.params.id)
+    if (!product) {
+        return next(new ApiError(`No product found for this id ${req.params.id}`, 404))
+    }
+    return res.status(204).send().status({ message: "Product deleted successfully" });
 })
 
 exports.getProduct = getDocument(Product)

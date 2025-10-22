@@ -7,6 +7,8 @@ const {
   getOrdersPrice,
   getOrdersCount,
   getUserOrders,
+  updateAllOrders,
+  deleteAllOrders
 } = require("../controllers/orderController");
 const {
   createOrderValidator,
@@ -21,7 +23,9 @@ const express = require("express");
 const router = express.Router();
 
 router.route("/").post(createOrderValidator, createOrder).get(getAllOrders);
+router.route("/updateAll").put(updateAllOrders)
 
+router.route("/deleteAll").delete(deleteAllOrders)
 router
   .route("/:id")
   .put(updateOrderValidator, updateOrder)

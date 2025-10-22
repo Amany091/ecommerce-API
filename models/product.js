@@ -63,6 +63,12 @@ const productSchema = mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "Brand",
     },
+    type: {
+        type: String,
+        required: false,
+        enum: ["kids", "women", "men", "accessories"],
+        default: "women",
+    },
 }, { timestamps: true });
 
 hostedImage("products", productSchema, "imgCover")

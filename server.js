@@ -20,7 +20,10 @@ const app = express()
 
 app.use(
   cors({
-    origin: process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : process.env.BASE_URL,
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CLIENT_URL
+        : process.env.CLIENT_URL_DEV,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })

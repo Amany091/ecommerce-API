@@ -1,24 +1,9 @@
 const { check, body } = require("express-validator");
 const validatorMiddleware = require("../middlewares/validatorMiddleware");
 const User = require("../models/user");
-const statusOptions = ["pending", "processing", "complete", "canceled"];
+const statusOptions = ["pending", "processing", "completed", "canceled"];
 
 exports.createOrderValidator = [
-  // check("price")
-  //   .notEmpty()
-  //   .withMessage("Order price is required.")
-  //   .isNumeric()
-  //   .withMessage("Order price must be a number.")
-  //   .custom((value) => {
-  //     if (value < 0) {
-  //       throw new Error("Order price must be greater than or equal to 0.");
-  //     }
-  //     if (value > 20000) {
-  //       throw new Error("Order price must be less than or equal to 20000.");
-  //     }
-  //     return true;
-  //   }),
-
   check("user")
     .notEmpty()
     .withMessage("Order must belong to a user.")
