@@ -65,7 +65,7 @@ exports.getAllOrders = asyncWrapper(async (req, res) => {
   const count = await Order.countDocuments();
   const limit = 5;
   const filter = {}
-  if(status) filter.status = status;
+  if(status && status !== "all") filter.status = status;
   let userFilter = {};
   if(userName) userFilter = {name : {$regex: userName, $options: "i"}};
   
@@ -120,7 +120,7 @@ exports.updateAllOrders = asyncWrapper(async (req,res)=>{
     { _id: {$in: ids} },
     { $set: { status: "completed" } }
   );
-  const result = await Order.find({_id: {$in: ids}});
+  const result = await Order.find();
   return res.status(200).json({ data: result });
 })
 
